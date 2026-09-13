@@ -56,9 +56,33 @@ public class CommentInMemoryRepository : ICommentRepository
 
         return Task.FromResult(comment);
     }
+    
 
     public IQueryable<Comments> GetMany()
     {
         return comments.AsQueryable();
+    }
+
+    public CommentInMemoryRepository()
+    {
+        comments = new List<Comments>()
+        {
+            new Comments()
+            {
+                body = "Omg this is sooo nicee <333", commentId = 1, UserId = 1, postId = 1
+            },
+            new Comments()
+            {
+                body = "I love this post!", commentId = 2, UserId = 2, postId = 2
+            },
+            new Comments()
+            {
+                body = "I am so happy to see this post!", commentId = 3, UserId = 3, postId = 3
+            },
+            new Comments()
+            {
+                body = "I am so happy to see this post!", commentId = 4, UserId = 1, postId = 1
+            }
+        };
     }
 }

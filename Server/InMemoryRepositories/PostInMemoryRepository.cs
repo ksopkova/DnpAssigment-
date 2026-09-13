@@ -58,4 +58,24 @@ public class PostInMemoryRepository : IPostRepository
         posts.Remove(postToRemove);
         return Task.CompletedTask;
     }
+
+    public PostInMemoryRepository()
+    {
+        posts = new List<Post>
+        {
+            new Post()
+            {
+                body = "Story of my life...", postId = 1, title = "About me", UserId = 1
+            },
+            new Post()
+            {
+                body = "My interests are...", postId = 2, title = "Interests", UserId = 2
+            },
+            new Post()
+            {
+                body = "My hobbies are...", postId = 3, title = "Hobbies", UserId = 3
+            }
+
+        };
+    }
 }

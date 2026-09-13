@@ -28,7 +28,7 @@ public class UserInMemoryRepository : IUserRepository
 
         return Task.FromResult(user);
     }
-    
+
     public Task UpdateAsync(User user)
     {
         User? existingUser = users.SingleOrDefault(p => p.UserId == user.UserId);
@@ -43,7 +43,7 @@ public class UserInMemoryRepository : IUserRepository
 
         return Task.CompletedTask;
     }
-    
+
     public Task<User> GetSingleAsync(int id)
     {
         User? user = users.SingleOrDefault(p => p.UserId == id);
@@ -55,6 +55,7 @@ public class UserInMemoryRepository : IUserRepository
 
         return Task.FromResult(user);
     }
+
     public Task DeleteAsync(int id)
     {
         User? userToRemove = users.SingleOrDefault(p => p.UserId == id);
@@ -67,8 +68,28 @@ public class UserInMemoryRepository : IUserRepository
         users.Remove(userToRemove);
         return Task.CompletedTask;
     }
+
     public IQueryable<User> GetMany()
     {
         return users.AsQueryable();
+    }
+
+    public UserInMemoryRepository()
+    {
+        users = new List<User>
+        {
+            new User()
+            {
+                Password = "Klokanica", UserId = 1, UserName = "Kristinka"
+            },
+            new User()
+            {
+                Password = "Sarkanica", UserId = 2, UserName = "Radka"
+            },
+            new User()
+            {
+                Password = "Patkanica", UserId = 3, UserName = "Wilma The Maltipoo"
+            }
+        };
     }
 }
