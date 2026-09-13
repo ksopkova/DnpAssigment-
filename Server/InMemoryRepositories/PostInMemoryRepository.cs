@@ -4,10 +4,12 @@ namespace InMemoryRepositories;
 
 public class PostInMemoryRepository : IPostRepository
 {
+    private List<Post> posts = new();
+
     public Task<Post> AddAsync(Post post)
     {
-        post.Id = posts.Any()
-            ? posts.Max(p => p.Id) + 1
+        post.postId = posts.Any()
+            ? posts.Max(p => p.postId) + 1
             : 1;
         posts.Add(post);
         return Task.FromResult(post);
@@ -15,11 +17,11 @@ public class PostInMemoryRepository : IPostRepository
 
     public Task UpdateAsync(Post post)
     {
-        Post? existingPost = posts.SingleOrDefault(p => p.Id == post.Id);
+        Post? existingPost = posts.SingleOrDefault(p => p.postId == post.postId);
         if (existingPost is null)
         {
             throw new InvalidOperationException(
-                $"Post with ID '{post.Id}' not found");
+                $"Post with ID '{post.postId}' not found");
         }
 
         posts.Remove(existingPost);
@@ -29,7 +31,13 @@ public class PostInMemoryRepository : IPostRepository
     }
     public Task<Post> GetSingleAsync(int id)
     {
-        // Do implementation
+        Post? post = posts.SingleOrDefault(p => p.postId == id);
+        if (post is null)
+        {
+            throw new InvalidOperationException(
+                $"Post with ID '{id}' not found");
+        }
+
         return Task.FromResult(post);
     }
     
