@@ -7,12 +7,14 @@ public class Post
     public string title { get; set; }
     public string body { get; set; }
     public int commentId { get; set; }
+    public string commentBody { get; set; }
     public override string ToString()
     {
         return $"Title: {title}\n" +
                $"Body: {body}\n" +
                $"UserId: {UserId}\n"+
-               $"CommentId: {commentId}\n";
+               $"CommentId: {commentId}\n"+
+               $"CommentBody: {commentBody}";
         
     }
 }
