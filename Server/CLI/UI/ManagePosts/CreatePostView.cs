@@ -5,36 +5,52 @@ namespace CLI.UI.ManagePosts;
 
 public class CreatePostView
 {
-    private readonly IPostRepository postRepository;
+    private readonly IPostRepository _postRepository;
+    private readonly ICommentRepository _commentRepository;
 
     //field variable type is the interface = Dependency Inversion Principle from SOLID
-    public CreatePostView(IPostRepository postRepository)
+    public CreatePostView(IPostRepository postRepository, ICommentRepository commentRepository)
     {
-        this.postRepository = postRepository;
+        _postRepository = postRepository;
+        _commentRepository = commentRepository;
     }
 
     public async Task Show()
     {
         Console.Write("Title: ");
-        string title = Console.ReadLine();
+        var title = Console.ReadLine() ?? string.Empty;
 
         Console.Write("Body: ");
-        string body = Console.ReadLine();
+        var body = Console.ReadLine() ?? string.Empty;
         
         Console.Write("Comment: ");
-        string comment = Console.ReadLine();
+        var comment = Console.ReadLine() ?? string.Empty;
 
-        Post post = new Post
+        var post = new Post
         {
             title = title,
             body = body,
             UserId = 1,
-            commentId = 1,
-            commentBody = comment
+            commentId = 0,
+            commentBody = string.Empty
         };
 
-        await postRepository.AddAsync(post);
+        post = await _postRepository.AddAsync(post);
 
-        
+        if (!string.IsNullOrWhiteSpace(comment))
+        {
+            var newComment = new Comments
+            {
+                body = comment,
+                postId = post.postId,
+                UserId = 1
+            };
+
+            newComment = await _commentRepository.AddAsync(newComment);
+
+            post.commentId = newComment.commentId;
+            post.commentBody = newComment.body;
+            await _postRepository.UpdateAsync(post);
+        }
     }
 }
