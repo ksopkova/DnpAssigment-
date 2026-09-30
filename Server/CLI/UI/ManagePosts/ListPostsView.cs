@@ -1,12 +1,12 @@
-using InMemoryRepositories;
+using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
 public class ListPostsView
 {
-    private readonly PostInMemoryRepository _postRepository;
+    private readonly IPostRepository _postRepository;
     
-    public ListPostsView(PostInMemoryRepository postRepository)
+    public ListPostsView(IPostRepository postRepository)
     {
         _postRepository = postRepository;
     }

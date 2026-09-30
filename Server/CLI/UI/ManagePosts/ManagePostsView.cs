@@ -1,13 +1,13 @@
-using InMemoryRepositories;
+using RepositoryContracts;
 
 namespace CLI.UI.ManagePosts;
 
 public class ManagePostsView
 {
-    private readonly PostInMemoryRepository _postRepository;
-    private readonly CommentInMemoryRepository _commentRepository;
+    private readonly IPostRepository _postRepository;
+    private readonly ICommentRepository _commentRepository;
     
-    public ManagePostsView(PostInMemoryRepository postRepository, CommentInMemoryRepository commentRepository)
+    public ManagePostsView(IPostRepository postRepository, ICommentRepository commentRepository)
     {
         _postRepository = postRepository;
         _commentRepository = commentRepository;
@@ -24,7 +24,7 @@ public class ManagePostsView
             Console.WriteLine("0 - Back");
             Console.Write("Choose: ");
 
-            string? choice = Console.ReadLine();
+            var choice = Console.ReadLine();
 
             switch (choice)
             {
