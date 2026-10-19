@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{DBF728
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiContracts", "ApiContracts\ApiContracts.csproj", "{22413AD1-3934-40C5-B8D2-BB108D7E44D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication3", "Server\WebApplication3\WebApplication3.csproj", "{9DB49A5F-C3DD-4FAD-B74A-43874AE4FAEF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI", "Server\WebAPI\WebAPI.csproj", "{9DB49A5F-C3DD-4FAD-B74A-43874AE4FAEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
