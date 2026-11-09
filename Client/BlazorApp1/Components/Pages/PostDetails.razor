@@ -1,0 +1,177 @@
+@page "/posts/{PostId:int}"
+@rendermode InteractiveServer
+
+<PageTitle>Post details</PageTitle>
+
+<a class="btn btn-link px-0 mb-3" href="posts">&larr; Back to posts</a>
+
+@if (isLoading)
+{
+    <p><em>Loading post...</em></p>
+}
+else if (post is null)
+{
+    <div class="alert alert-warning">
+        Post not found.
+    </div>
+}
+else
+{
+    <article class="mb-4">
+        <h1 class="mb-2">@post.title</h1>
+        <p class="text-muted mb-3">Author: @GetUserName(post.UserId)</p>
+        <div class="card">
+            <div class="card-body">
+                <p class="card-text mb-0">@post.body</p>
+            </div>
+        </div>
+    </article>
+
+    <section class="mb-4">
+        <h2 class="h4">Comments</h2>
+
+        @if (comments.Count == 0)
+        {
+            <p>No comments yet.</p>
+        }
+        else
+        {
+            <div class="list-group mb-3">
+                @foreach (var comment in comments)
+                {
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <strong>@GetUserName(comment.UserId)</strong>
+                        </div>
+                        <p class="mb-0">@comment.body</p>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <section>
+        <h2 class="h4">Add comment</h2>
+
+        @if (users.Count == 0)
+        {
+            <div class="alert alert-info">
+                Create a user first before adding comments.
+            </div>
+        }
+        else
+        {
+            <EditForm Model="@commentModel" OnValidSubmit="AddCommentAsync" class="card card-body">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label class="form-label">Author</label>
+                    <InputSelect class="form-select" @bind-Value="commentModel.UserId">
+                        @foreach (var user in users)
+                        {
+                            <option value="@user.UserId">@user.UserName</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Comment</label>
+                    <InputTextArea class="form-control" rows="4" @bind-Value="commentModel.Body" />
+                </div>
+
+                <button class="btn btn-primary" type="submit" disabled="@isSaving">@saveButtonText</button>
+
+                @if (!string.IsNullOrWhiteSpace(statusMessage))
+                {
+                    <div class="alert alert-success mt-3 mb-0">@statusMessage</div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="alert alert-danger mt-3 mb-0">@errorMessage</div>
+                }
+            </EditForm>
+        }
+    </section>
+}
+
+@code {
+    [Parameter] public int PostId { get; set; }
+    [Inject] private BlogApiClient Api { get; set; } = default!;
+
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? statusMessage;
+    private string? errorMessage;
+    private Post? post;
+    private List<User> users = new();
+    private List<Comments> comments = new();
+    private NewCommentModel commentModel = new();
+
+    private string saveButtonText => isSaving ? "Saving..." : "Add comment";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        statusMessage = null;
+        post = await Api.GetPostAsync(PostId);
+        users = await Api.GetUsersAsync();
+        comments = post is null ? new List<Comments>() : await Api.GetCommentsForPostAsync(PostId);
+
+        if (users.Count > 0 && commentModel.UserId == 0)
+        {
+            commentModel.UserId = users[0].UserId;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task AddCommentAsync()
+    {
+        if (post is null)
+        {
+            return;
+        }
+
+        isSaving = true;
+        statusMessage = null;
+        errorMessage = null;
+
+        try
+        {
+            await Api.CreateCommentAsync(PostId, new Comments
+            {
+                UserId = commentModel.UserId,
+                body = commentModel.Body,
+                postId = PostId
+            });
+
+            comments = await Api.GetCommentsForPostAsync(PostId);
+            var selectedUserId = commentModel.UserId;
+            commentModel = new NewCommentModel { UserId = selectedUserId };
+            statusMessage = "Comment added.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Unable to add comment: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private string GetUserName(int userId)
+        => users.FirstOrDefault(user => user.UserId == userId)?.UserName ?? $"User {userId}";
+
+    private sealed class NewCommentModel
+    {
+        [Range(1, int.MaxValue, ErrorMessage = "Choose an author.")]
+        public int UserId { get; set; }
+
+        [Required(ErrorMessage = "Comment text is required.")]
+        [StringLength(1000, MinimumLength = 1, ErrorMessage = "Comment must not be empty.")]
+        public string Body { get; set; } = string.Empty;
+    }
+}

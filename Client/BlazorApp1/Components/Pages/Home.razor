@@ -1,0 +1,90 @@
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<h1 class="mb-3">School blog</h1>
+
+<p class="lead">
+    This Blazor app covers the required CRUD flow: users, posts and comments.
+</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Posts</h5>
+                <p class="card-text">Browse posts, open details and read comments.</p>
+                <a class="btn btn-primary" href="posts">Open posts</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">New post</h5>
+                <p class="card-text">Create a new post for an existing user.</p>
+                <a class="btn btn-primary" href="posts/new">Create post</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">New user</h5>
+                <p class="card-text">Add a new author to the system.</p>
+                <a class="btn btn-primary" href="users/new">Add user</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="h4">Latest posts</h2>
+
+@if (isLoading)
+{
+    <p><em>Loading posts...</em></p>
+}
+else if (recentPosts.Count == 0)
+{
+    <p>No posts yet.</p>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var post in recentPosts)
+        {
+            <a class="list-group-item list-group-item-action" href="posts/@post.postId">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">@post.title</h5>
+                    <small>@GetAuthorName(post.UserId)</small>
+                </div>
+                <p class="mb-1 text-truncate">@post.body</p>
+            </a>
+        }
+    </div>
+}
+
+@code {
+    [Inject] private BlogApiClient Api { get; set; } = default!;
+
+    private bool isLoading = true;
+    private List<Post> recentPosts = new();
+    private List<User> users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Api.GetUsersAsync();
+        recentPosts = (await Api.GetPostsAsync())
+            .OrderByDescending(post => post.postId)
+            .Take(5)
+            .ToList();
+        isLoading = false;
+    }
+
+    private string GetAuthorName(int userId)
+    {
+        var user = users.FirstOrDefault(item => item.UserId == userId);
+        return user?.UserName ?? $"User {userId}";
+    }
+}

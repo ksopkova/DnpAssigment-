@@ -1,0 +1,115 @@
+@page "/posts/new"
+@rendermode InteractiveServer
+
+<PageTitle>New post</PageTitle>
+
+<h1 class="mb-3">Create post</h1>
+
+@if (isLoading)
+{
+    <p><em>Loading users...</em></p>
+}
+else if (users.Count == 0)
+{
+    <div class="alert alert-info">
+        Add at least one user first, then you can create posts.
+    </div>
+}
+else
+{
+    <EditForm Model="@postModel" OnValidSubmit="CreatePostAsync" class="card card-body">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <InputText class="form-control" @bind-Value="postModel.Title" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Body</label>
+            <InputTextArea class="form-control" rows="6" @bind-Value="postModel.Body" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Author</label>
+            <InputSelect class="form-select" @bind-Value="postModel.UserId">
+                @foreach (var user in users)
+                {
+                    <option value="@user.UserId">@user.UserName</option>
+                }
+            </InputSelect>
+        </div>
+
+        <button class="btn btn-primary" type="submit" disabled="@isSaving">@saveButtonText</button>
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="alert alert-danger mt-3 mb-0">@errorMessage</div>
+        }
+    </EditForm>
+}
+
+@code {
+    [Inject] private BlogApiClient Api { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private List<User> users = new();
+    private NewPostModel postModel = new();
+
+    private string saveButtonText => isSaving ? "Saving..." : "Create post";
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Api.GetUsersAsync();
+        if (users.Count > 0)
+        {
+            postModel.UserId = users[0].UserId;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task CreatePostAsync()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            var createdPost = await Api.CreatePostAsync(new Post
+            {
+                title = postModel.Title.Trim(),
+                body = postModel.Body,
+                UserId = postModel.UserId
+            });
+
+            Navigation.NavigateTo($"posts/{createdPost.postId}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Unable to create post: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private sealed class NewPostModel
+    {
+        [Required(ErrorMessage = "Title is required.")]
+        [StringLength(200, MinimumLength = 3, ErrorMessage = "Title must be at least 3 characters.")]
+        public string Title { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Body is required.")]
+        [StringLength(4000, MinimumLength = 1, ErrorMessage = "Body must not be empty.")]
+        public string Body { get; set; } = string.Empty;
+
+        [Range(1, int.MaxValue, ErrorMessage = "Choose an author.")]
+        public int UserId { get; set; }
+    }
+}

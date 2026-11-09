@@ -1,0 +1,82 @@
+@page "/users/new"
+@rendermode InteractiveServer
+
+<PageTitle>New user</PageTitle>
+
+<h1 class="mb-3">Add new user</h1>
+
+<EditForm Model="@userModel" OnValidSubmit="CreateUserAsync" class="card card-body">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Username</label>
+        <InputText class="form-control" @bind-Value="userModel.UserName" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText class="form-control" type="password" @bind-Value="userModel.Password" />
+    </div>
+
+    <button class="btn btn-primary" type="submit" disabled="@isSaving">@saveButtonText</button>
+
+    @if (!string.IsNullOrWhiteSpace(statusMessage))
+    {
+        <div class="alert alert-success mt-3 mb-0">@statusMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="alert alert-danger mt-3 mb-0">@errorMessage</div>
+    }
+</EditForm>
+
+@code {
+    [Inject] private BlogApiClient Api { get; set; } = default!;
+
+    private bool isSaving;
+    private string? statusMessage;
+    private string? errorMessage;
+    private NewUserModel userModel = new();
+
+    private string saveButtonText => isSaving ? "Saving..." : "Add user";
+
+    private async Task CreateUserAsync()
+    {
+        isSaving = true;
+        statusMessage = null;
+        errorMessage = null;
+
+        try
+        {
+            await Api.CreateUserAsync(new User
+            {
+                UserName = userModel.UserName.Trim(),
+                Password = userModel.Password
+            });
+
+            userModel = new NewUserModel();
+            statusMessage = "User added.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Unable to create user: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private sealed class NewUserModel
+    {
+        [Required(ErrorMessage = "Username is required.")]
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "Username must be at least 3 characters.")]
+        public string UserName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password is required.")]
+        [StringLength(100, MinimumLength = 4, ErrorMessage = "Password must be at least 4 characters.")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

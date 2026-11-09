@@ -1,0 +1,64 @@
+@page "/posts"
+@rendermode InteractiveServer
+
+<PageTitle>Posts</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Posts</h1>
+    <a class="btn btn-primary" href="posts/new">Create post</a>
+</div>
+
+@if (isLoading)
+{
+    <p><em>Loading posts...</em></p>
+}
+else if (posts.Count == 0)
+{
+    <p>No posts available yet.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var post in posts)
+            {
+                <tr>
+                    <td>@post.title</td>
+                    <td>@GetAuthorName(post.UserId)</td>
+                    <td class="text-end">
+                        <a class="btn btn-outline-primary btn-sm" href="posts/@post.postId">View details</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Inject] private BlogApiClient Api { get; set; } = default!;
+
+    private bool isLoading = true;
+    private List<Post> posts = new();
+    private List<User> users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Api.GetUsersAsync();
+        posts = (await Api.GetPostsAsync())
+            .OrderByDescending(post => post.postId)
+            .ToList();
+        isLoading = false;
+    }
+
+    private string GetAuthorName(int userId)
+        => users.FirstOrDefault(user => user.UserId == userId)?.UserName ?? $"User {userId}";
+}
