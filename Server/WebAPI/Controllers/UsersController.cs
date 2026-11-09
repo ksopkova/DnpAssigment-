@@ -31,10 +31,17 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet("{id:int}", Name = "Users_GetSingle")]
-    public async Task<User> GetSingle(int id)
+    public async Task<ActionResult<User>> GetSingle(int id)
     {
-        var user = await _userRepository.GetSingleAsync(id);
-        return user;
+        try
+        {
+            var user = await _userRepository.GetSingleAsync(id);
+            return user;
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpPost(Name = "Users_Create")]
@@ -44,15 +51,31 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut(Name = "Users_Update")]
-    public Task UpdateAsync(User user)
+    public async Task<IActionResult> UpdateAsync(User user)
     {
-        return _userRepository.UpdateAsync(user);
+        try
+        {
+            await _userRepository.UpdateAsync(user);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
     
     [HttpDelete("{id:int}", Name = "Users_Delete")]
-    public Task DeleteAsync(int id)
+    public async Task<IActionResult> DeleteAsync(int id)
     {
-        return _userRepository.DeleteAsync(id);
+        try
+        {
+            await _userRepository.DeleteAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
     
 }

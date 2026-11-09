@@ -61,6 +61,7 @@ public class PostFileRepository: IPostRepository
                 $"Post with ID '{id}' not found");
         }
         posts.Remove(postToRemove);
+        await SaveAsync(posts);
     }
 
     public async Task<Post> GetSingleAsync(int id)

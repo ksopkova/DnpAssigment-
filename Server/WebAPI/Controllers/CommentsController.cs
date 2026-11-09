@@ -42,16 +42,23 @@ public class CommentsController:ControllerBase
     }
 
     [HttpGet("{id:int}", Name = "Comments_GetSingleByPost")]
-    public async Task<Comments> GetSingle(int postId, int id)
+    public async Task<ActionResult<Comments>> GetSingle(int postId, int id)
     {
-        var comment = await _commentRepository.GetSingleAsync(id);
-
-        if (comment.postId != postId)
+        try
         {
-            throw new InvalidOperationException($"Comment with ID '{id}' not found for post '{postId}'");
-        }
+            var comment = await _commentRepository.GetSingleAsync(id);
 
-        return comment;
+            if (comment.postId != postId)
+            {
+                return NotFound($"Comment with ID '{id}' not found for post '{postId}'");
+            }
+
+            return comment;
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpPost(Name = "Comments_CreateForPost")]
@@ -63,24 +70,40 @@ public class CommentsController:ControllerBase
     }
 
     [HttpPut("{id:int}", Name = "Comments_UpdateForPost")]
-    public async Task Update(int postId, int id, Comments comment)
+    public async Task<IActionResult> Update(int postId, int id, Comments comment)
     {
         comment.commentId = id;
         comment.postId = postId;
-        await _commentRepository.UpdateAsync(comment);
+        try
+        {
+            await _commentRepository.UpdateAsync(comment);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpDelete("{id:int}", Name = "Comments_DeleteForPost")]
-    public async Task Delete(int postId, int id)
+    public async Task<IActionResult> Delete(int postId, int id)
     {
-        var comment = await _commentRepository.GetSingleAsync(id);
-
-        if (comment.postId != postId)
+        try
         {
-            throw new InvalidOperationException($"Comment with ID '{id}' not found for post '{postId}'");
-        }
+            var comment = await _commentRepository.GetSingleAsync(id);
 
-        await _commentRepository.DeleteAsync(id);
+            if (comment.postId != postId)
+            {
+                return NotFound($"Comment with ID '{id}' not found for post '{postId}'");
+            }
+
+            await _commentRepository.DeleteAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
     
     

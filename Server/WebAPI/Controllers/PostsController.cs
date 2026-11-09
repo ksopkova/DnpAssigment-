@@ -23,10 +23,17 @@ public class PostsController : ControllerBase
     }
 
     [HttpGet("{id:int}", Name = "Posts_GetSingle")]
-    public async Task<Post> GetSingle(int id)
+    public async Task<ActionResult<Post>> GetSingle(int id)
     {
-        Post post = await _postRepository.GetSingleAsync(id);
-        return post;
+        try
+        {
+            var post = await _postRepository.GetSingleAsync(id);
+            return post;
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
     
     [HttpPost(Name = "Posts_Create")]
@@ -37,15 +44,31 @@ public class PostsController : ControllerBase
     }
     
     [HttpPut(Name = "Posts_Update")]
-    public async Task Update(Post post)
+    public async Task<IActionResult> Update(Post post)
     {
-        await _postRepository.UpdateAsync(post);
+        try
+        {
+            await _postRepository.UpdateAsync(post);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
     
     [HttpDelete("{id:int}", Name = "Posts_Delete")]
-    public async Task Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        await _postRepository.DeleteAsync(id);
+        try
+        {
+            await _postRepository.DeleteAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
     
     
