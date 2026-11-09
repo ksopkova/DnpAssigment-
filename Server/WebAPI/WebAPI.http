@@ -4,3 +4,133 @@ GET {{WebAPI_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+GET {{WebAPI_HostAddress}}/Posts
+Accept: application/json
+
+###
+
+GET {{WebAPI_HostAddress}}/Posts/1
+Accept: application/json
+
+###
+
+POST {{WebAPI_HostAddress}}/Posts
+Content-Type: application/json
+
+{
+  "UserId": 1,
+  "title": "New post from WebAPI.http",
+  "body": "This is a sample post body",
+  "commentId": 1,
+  "commentBody": "Sample comment body"
+}
+
+###
+
+PUT {{WebAPI_HostAddress}}/Posts
+Content-Type: application/json
+
+{
+  "postId": 1,
+  "UserId": 1,
+  "title": "Updated post title",
+  "body": "Updated post body",
+  "commentId": 1,
+  "commentBody": "Updated comment body"
+}
+
+###
+
+DELETE {{WebAPI_HostAddress}}/Posts/1
+
+###
+
+GET {{WebAPI_HostAddress}}/Users
+Accept: application/json
+
+###
+
+GET {{WebAPI_HostAddress}}/Users?userNameContains=Krist
+Accept: application/json
+
+###
+
+GET {{WebAPI_HostAddress}}/Users/1
+Accept: application/json
+
+###
+
+POST {{WebAPI_HostAddress}}/Users
+Content-Type: application/json
+
+{
+  "UserName": "newuser",
+  "Password": "secret123"
+}
+
+###
+
+PUT {{WebAPI_HostAddress}}/Users
+Content-Type: application/json
+
+{
+  "UserId": 1,
+  "UserName": "updateduser",
+  "Password": "updatedsecret"
+}
+
+###
+
+DELETE {{WebAPI_HostAddress}}/Users/1
+
+###
+
+GET {{WebAPI_HostAddress}}/Posts/1/Comments
+Accept: application/json
+
+###
+
+GET {{WebAPI_HostAddress}}/Posts/1/Comments?userId=1
+Accept: application/json
+
+###
+
+GET {{WebAPI_HostAddress}}/Posts/1/Comments?userName=Kristinka
+Accept: application/json
+
+###
+
+GET {{WebAPI_HostAddress}}/Posts/1/Comments?userId=1&userName=Kristinka
+Accept: application/json
+
+###
+
+GET {{WebAPI_HostAddress}}/Posts/1/Comments/1
+Accept: application/json
+
+###
+
+POST {{WebAPI_HostAddress}}/Posts/1/Comments
+Content-Type: application/json
+
+{
+  "body": "New comment from WebAPI.http",
+  "UserId": 1
+}
+
+###
+
+PUT {{WebAPI_HostAddress}}/Posts/1/Comments/1
+Content-Type: application/json
+
+{
+  "body": "Updated comment from WebAPI.http",
+  "UserId": 1
+}
+
+###
+
+DELETE {{WebAPI_HostAddress}}/Posts/1/Comments/1
+
+###
